@@ -1,0 +1,241 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+    <title>AR Space World</title>
+
+    <script src="https://aframe.io/releases/1.6.0/aframe.min.js"></script>
+
+    <script src="https://cdn.jsdelivr.net/gh/AR-js-org/AR.js@3.4.7/aframe/build/aframe-ar.js"></script>
+
+    <style>
+        body {
+            margin: 0;
+            overflow: hidden;
+        }
+
+        .controls {
+            position: fixed;
+            top: 15px;
+            left: 0;
+            width: 100%;
+            z-index: 9999;
+            display: flex;
+            justify-content: center;
+            gap: 10px;
+        }
+
+        .controls button {
+            padding: 12px 18px;
+            border: none;
+            border-radius: 8px;
+            font-weight: bold;
+            cursor: pointer;
+        }
+
+        /* Status Banner */
+        #statusBanner {
+            position: fixed;
+            top: 70px;
+            left: 50%;
+            transform: translateX(-50%);
+            width: 85%;
+            max-width: 350px;
+            padding: 12px;
+            border-radius: 10px;
+            text-align: center;
+            font-weight: bold;
+            font-size: 16px;
+            color: white;
+            background-color: #555555;
+            z-index: 9999;
+            box-sizing: border-box;
+        }
+
+        #statusBanner.found {
+            background-color: #16A34A;
+        }
+
+        #statusBanner.lost {
+            background-color: #DC2626;
+        }
+    </style>
+</head>
+
+<body>
+
+    <!-- Colour Buttons -->
+    <div class="controls">
+
+        <button onclick="changeColor('#00AEEF')">
+            BLUE
+        </button>
+
+        <button onclick="changeColor('#22CC66')">
+            GREEN
+        </button>
+
+        <button onclick="changeColor('#FFCC00')">
+            YELLOW
+        </button>
+
+    </div>
+
+    <!-- Status Banner -->
+    <div id="statusBanner">
+        SEARCHING FOR HIRO MARKER...
+    </div>
+
+    <a-scene
+        embedded
+        vr-mode-ui="enabled: false"
+        arjs="sourceType: webcam; debugUIEnabled: false;">
+
+        <a-assets>
+            <a-asset-item
+                id="astronaut"
+                src="models/AE-Space-Word.gltf">
+            </a-asset-item>
+        </a-assets>
+
+        <a-marker preset="hiro" id="hiroMarker">
+
+            <!-- Blue Cube -->
+            <a-box
+                id="blueCube"
+                position="-0.25 0.25 0.25"
+                color="#00AEEF"
+                scale="0.25 0.25 0.25"
+                animation="property: rotation; to: 0 360 0; loop: true; dur: 3000; easing: linear">
+            </a-box>
+
+            <!-- Red Sphere -->
+            <a-sphere
+                position="0.25 0.25 0.25"
+                radius="0.16"
+                color="#FF3333"
+                animation="property: position; to: 0.25 0.55 0.25; dir: alternate; loop: true; dur: 1200">
+            </a-sphere>
+
+            <!-- Green Cylinder -->
+            <a-cylinder
+                position="-0.25 0.25 -0.25"
+                radius="0.13"
+                height="0.3"
+                color="#00CC66">
+            </a-cylinder>
+
+            <!-- Yellow Torus -->
+            <a-torus
+                position="0.25 0.25 -0.25"
+                radius="0.15"
+                radius-tubular="0.04"
+                color="#FFD700">
+            </a-torus>
+
+            <!-- Space World Text -->
+            <a-text
+                value="SPACE WORLD"
+                position="0 0.75 0"
+                align="center"
+                color="#FFFFFF"
+                scale="0.6 0.6 0.6">
+            </a-text>
+
+            <!-- Tappable Purple Diamond -->
+            <a-dodecahedron
+                id="tapObject"
+                class="clickable"
+                position="0 0.25 -0.55"
+                radius="0.15"
+                color="#9B59B6"
+                scale="0.15 0.15 0.15">
+            </a-dodecahedron>
+
+            <!-- Astronaut Model -->
+            <a-entity
+                gltf-model="#astronaut"
+                position="0 0 0"
+                rotation="0 0 0"
+                scale="0.1 0.1 0.1">
+            </a-entity>
+
+        </a-marker>
+
+        <!-- Camera -->
+        <a-entity
+            camera
+            cursor="rayOrigin: mouse; fuse: false"
+            raycaster="objects: .clickable; far: 20">
+        </a-entity>
+
+    </a-scene>
+
+    <script>
+
+        document.addEventListener('DOMContentLoaded', function () {
+
+            // Marker Status Banner
+            const marker = document.querySelector('#hiroMarker');
+            const banner = document.querySelector('#statusBanner');
+
+            marker.addEventListener('markerFound', function () {
+
+                banner.textContent = 'MARKER FOUND! SPACE WORLD ACTIVATED';
+                banner.className = 'found';
+
+                console.log('Hiro Marker Found!');
+
+            });
+
+            marker.addEventListener('markerLost', function () {
+
+                banner.textContent = 'MARKER LOST! PLEASE SCAN AGAIN';
+                banner.className = 'lost';
+
+                console.log('Hiro Marker Lost!');
+
+            });
+
+            // Purple Diamond Interaction
+            const tapObject = document.querySelector('#tapObject');
+
+            let isLarge = false;
+
+            tapObject.addEventListener('click', function () {
+
+                isLarge = !isLarge;
+
+                if (isLarge) {
+
+                    this.setAttribute('scale', '0.3 0.3 0.3');
+                    this.setAttribute('color', '#FF3366');
+
+                } else {
+
+                    this.setAttribute('scale', '0.15 0.15 0.15');
+                    this.setAttribute('color', '#9B59B6');
+
+                }
+
+                console.log('Object clicked!');
+
+            });
+
+        });
+
+        // Blue Cube Colour Change
+        function changeColor(color) {
+
+            const cube = document.querySelector('#blueCube');
+
+            cube.setAttribute('color', color);
+
+        }
+
+    </script>
+
+</body>
+</html>
